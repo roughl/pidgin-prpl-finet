@@ -45,6 +45,7 @@
 #endif
 
 //#include <osxcart/osxcart/rtf.h>
+#include <unistd.h>
 #include <pth.h>
 #include <errno.h>
 #include <string.h>
