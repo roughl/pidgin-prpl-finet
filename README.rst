@@ -1,9 +1,9 @@
 Building
 ========
 
-To build the finet protocol plugin for pidgin, first download the source tarball of finet which matches your installed versoin. Then put finet.c and finet.h into the source directory at libpurple/plugins/
+To build the finet protocol plugin for pidgin, you will need the development package of pidgin.
 
-Inside this directory type make finet.so
+If you have installed the development package just type make.
 
 Installation
 ============
