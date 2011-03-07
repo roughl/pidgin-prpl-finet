@@ -1,9 +1,9 @@
 Building
 ========
 
-To build the finet protocol plugin for pidgin, you will need the development package of pidgin.
+To build the finet protocol plugin for pidgin, you will need the development package of pidgin and the osxcart (http://sourceforge.net/projects/osxcart/) library.
 
-If you have installed the development package just type make.
+If you have installed the necessary packages just type make.
 
 Installation
 ============
