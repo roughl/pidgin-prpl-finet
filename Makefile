@@ -1,5 +1,5 @@
 GCC = gcc
-LIBPURPLE_CFLAGS = `pkg-config --cflags purple` -DPURPLE_PLUGINS -DENABLE_NLS -DHAVE_ZLIB
+LIBPURPLE_CFLAGS = `pkg-config --libs --cflags osxcart` `pkg-config --cflags purple` -DPURPLE_PLUGINS -DENABLE_NLS -DHAVE_ZLIB
 
 CFLAGS = ${LIBPURPLE_CFLAGS} -Wall -I. -g -O2 -pipe
 
@@ -8,6 +8,9 @@ FINET_SOURCES = \
 	finet.h
 
 all:	finet.so
+
+install:	finet.so
+	cp finet.so ~/.purple/plugins/
 
 clean:
 	rm finet.so

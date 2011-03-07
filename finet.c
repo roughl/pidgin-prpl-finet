@@ -44,7 +44,7 @@
 # endif
 #endif
 
-//#include <osxcart/osxcart/rtf.h>
+#include <osxcart/osxcart/rtf.h>
 #include <unistd.h>
 #include <pth.h>
 #include <errno.h>
@@ -277,14 +277,14 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 	}
 
 	case eFinetSrvChatMessage: {
-	//	GtkTextBuffer* buffer = NULL;
-//		GError *error = NULL;
-//		buffer = gtk_text_buffer_new(NULL);
+		GtkTextBuffer* buffer = NULL;
+		GError *error = NULL;
+		buffer = gtk_text_buffer_new(NULL);
 		purple_debug_info("finet", "Received chat message from %s: %s\n", msg.userId, msg.data);
-//		if( rtf_text_buffer_import_from_string( buffer, msg.data, &error ) ) {
-//			gchar * data = gtk_text_buffer_get_text(buffer, NULL, NULL, FALSE);
-			serv_got_im(session->gc, msg.userId, msg.data, PURPLE_MESSAGE_RECV, time(NULL) );
-		//}
+		if( rtf_text_buffer_import_from_string( buffer, msg.data, &error ) ) {
+			gchar * data = gtk_text_buffer_get_text(buffer, NULL, NULL, FALSE);
+			serv_got_im(session->gc, msg.userId, data, PURPLE_MESSAGE_RECV, time(NULL) );
+		}
 		break;
 	}
 	
