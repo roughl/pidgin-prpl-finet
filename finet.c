@@ -499,7 +499,7 @@ finet_keepalive(PurpleConnection *gc)
 static int 
 finet_send_im( PurpleConnection* gc, const char *who, const char *message, PurpleMessageFlags flags)
 {
-	purple_debug_info("msn", "send IM {%s} to %s\n", message, who);
+	purple_debug_info("finet", "send IM {%s} to %s\n", message, who);
 	return finet_send_msg( gc->proto_data, eFinetChatMessage, who, message);
 }
 
