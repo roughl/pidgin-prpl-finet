@@ -300,6 +300,13 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 		purple_debug_info("finet", "Friendship Ended: %s, %s\n", msg.userId, msg.data);
 		break;
 
+	case eFinetSrvClientInfo:
+		purple_debug_info("finet", "Client Info requested: %s, %s\n", msg.userId, msg.data);
+		if( strcmp(msg.userId, FINET_CLIENT_INFO_VERSION) == 0 ) {
+			finet_send_msg(session, eFinetClientInfoResponse, FINET_CLIENT_INFO_VERSION, "Pidgin Finet " FINET_PLUGIN_VERSION ); 
+		}
+		break;
+
 	case  eFinetSrvStartTyping:
 		purple_debug_info("finet", "%s started typing: %s \n", msg.userId, msg.data);
 		break;
@@ -609,7 +616,7 @@ static PurplePluginInfo info = {
 	PURPLE_PRIORITY_DEFAULT,
 	FINETPRPL_ID,
 	"Finet",
-	"0.1", 
+	FINET_PLUGIN_VERSION,
 	_("Finet protocol Plugin"),
 	_("Implementation of the Finet protocol"),
 	NULL, /* correct author */

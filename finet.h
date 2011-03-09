@@ -14,6 +14,8 @@
 #define FINET_SERVER "finet.dynalias.net"
 #define FINET_BUF_LEN 255
 
+#define FINET_PLUGIN_VERSION "0.1"
+
 #define FINET_LOGIN_STEPS 3
 
 typedef struct FinetSession {
@@ -43,6 +45,7 @@ typedef enum {
 	eFinetNewAccount        = 0xC8
 }EFinetCodes;
 
+#define FINET_CLIENT_INFO_VERSION "VERSION"
 typedef enum {
 	eFinetSrvLoginResponse         = 0x00,
 	eFinetSrvLoadFriendList        = 0x01,
