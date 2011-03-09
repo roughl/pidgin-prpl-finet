@@ -440,7 +440,7 @@ finet_login(PurpleAccount* acct)
 									FINET_LOGIN_STEPS);  /* total number of steps */
 
 
-	host = purple_account_get_string(acct, "server", FINET_SERVER);
+	host = purple_account_get_string(acct, "host", FINET_SERVER);
 	port = purple_account_get_int(acct, "port", FINET_PORT);
 
 	purple_debug_info("finet", "connect(%s, %i)\n", host, port);
