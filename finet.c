@@ -207,7 +207,7 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 		purple_debug_info("finet", "received server login response\n");
 		if(strcmp(msg.userId, "OK") == 0) {
 			purple_connection_set_state(session->gc, PURPLE_CONNECTED);
-			finet_send_msg(session, eFinetKeepAlive, "", "59"); // set keep alive interval on server
+			finet_send_msg(session, eFinetKeepAlive, "", "60"); // set keep alive interval on server
 		}
 		else if(strcmp(msg.userId, "wrongPW") == 0) {
 			purple_connection_error_reason(session->gc, PURPLE_CONNECTION_ERROR_AUTHENTICATION_FAILED, _("wrong password"));
