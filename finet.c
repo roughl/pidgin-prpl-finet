@@ -224,6 +224,7 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 	case eFinetSrvLoadFriendList: {
 		PurpleBuddy *b;
 		purple_debug_info("finet", "received LoadFriendList %s -> %s\n", msg.userId, msg.data);
+		// '?' Indicates a not yet accepted friendship request
 		if( msg.userId[0] == '?' ) {
 			b = purple_find_buddy(session->acct, &msg.userId[1] );
 			if( b==NULL ) {
@@ -231,6 +232,7 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 				purple_blist_add_buddy(b, NULL, NULL, NULL);
 			}
 		}
+		// '*' Indicates that this user not yet accepted your friendship request
 		else if( msg.userId[0] == '*' ) {
 			b = purple_find_buddy(session->acct, &msg.userId[1] );
 			if( b==NULL ) {
@@ -238,6 +240,7 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 				purple_blist_add_buddy(b, NULL, NULL, NULL);
 			}
 		}
+		// ':' Indicates that a user accepted your friendship request just now
 		else if( msg.userId[0] == ':' ) {
 			b = purple_find_buddy(session->acct, &msg.userId[1] );
 			if( b==NULL ) {
