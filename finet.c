@@ -199,6 +199,30 @@ finet_send_msg(FinetSession* session, EFinetCodes code, const char* userId, cons
 }
 
 static void
+finet_auth_cb( gpointer user_data )
+{
+	ContactInvite* invite = (ContactInvite *)user_data;
+	purple_debug_info( "finet", "send auth response\n" );
+
+	finet_send_msg( invite->session, eFinetFriendshipAccept, invite->userId, "Yes" );
+
+	g_free( invite->userId );
+	g_free( invite );
+}
+
+static void
+finet_deny_cb( gpointer user_data )
+{
+	ContactInvite* invite = (ContactInvite *)user_data;
+	purple_debug_info( "finet", "send deny response\n" );
+	
+	finet_send_msg( invite->session, eFinetFriendshipAccept, invite->userId, "No" );
+
+	g_free( invite->userId );
+	g_free( invite );
+}
+
+static void
 finet_handle_msg( FinetSession* session, FinetMsg msg )
 {
 	switch(msg.code)
@@ -226,10 +250,20 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 		purple_debug_info("finet", "received LoadFriendList %s -> %s\n", msg.userId, msg.data);
 		// '?' Indicates a not yet accepted friendship request
 		if( msg.userId[0] == '?' ) {
+			ContactInvite *invite;
+			invite = g_new0( ContactInvite, 1);
+			invite->session = session;
+			invite->userId = g_strdup(&msg.userId[1]);
 			b = purple_find_buddy(session->acct, &msg.userId[1] );
-			if( b==NULL ) {
-				b = purple_buddy_new(session->acct, &msg.userId[1], msg.data );
-				purple_blist_add_buddy(b, NULL, NULL, NULL);
+			if( b ) {
+				//b = purple_buddy_new(session->acct, &msg.userId[1], msg.data );
+				//purple_blist_add_buddy(b, NULL, NULL, NULL);
+				purple_account_request_authorization( session->acct, &msg.userId[1], NULL,
+						msg.data, NULL, TRUE, finet_auth_cb, finet_deny_cb, invite );
+			}
+			else {
+				purple_account_request_authorization( session->acct, &msg.userId[1], NULL,
+						msg.data, NULL, FALSE, finet_auth_cb, finet_deny_cb, invite );
 			}
 		}
 		// '*' Indicates that this user not yet accepted your friendship request
@@ -458,7 +492,6 @@ finet_login(PurpleAccount* acct)
 	return;
 }
 
-
 static GList*
 finet_status_types(PurpleAccount* acct)
 {
@@ -495,6 +528,21 @@ finet_list_icon(PurpleAccount *account, PurpleBuddy *buddy)
 {
 	purple_debug_info("finet", "finet_list_icon()\n");
 	return "finet";
+}
+
+static void
+finet_add_buddy( PurpleConnection *gc, PurpleBuddy *buddy, PurpleGroup *group )
+{
+	purple_debug_info("finet", "adding %s to %s's buddy list\n",
+		buddy->name, gc->account->username);
+}
+
+static void
+finet_remove_buddy( PurpleConnection *gc, PurpleBuddy *buddy, PurpleGroup *group )
+{
+	purple_debug_info("finet", "removing %s from %s's buddy list\n",
+		buddy->name, gc->account->username);
+	finet_send_msg( gc->proto_data, eFinetFriendshipEnd, buddy->name, "" );
 }
 
 static void
@@ -553,9 +601,9 @@ PurplePluginProtocolInfo prpl_info = {
 	NULL,//finet_set_status,    /* set_status */
 	NULL,//finet_set_idle,      /* set_idle */
 	NULL,                /* change_passwd */
-	NULL,//finet_add_buddy,     /* add_buddy */
+	finet_add_buddy,     /* add_buddy */
 	NULL,                /* add_buddies */
-	NULL,//finet_remove_buddy,  /* remove_buddy */
+	finet_remove_buddy,  /* remove_buddy */
 	NULL,                /* remove_buddies */
 	NULL,//finet_add_permit,    /* add_permit */
 	NULL,//finet_add_deny,      /* add_deny */

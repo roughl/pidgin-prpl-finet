@@ -27,6 +27,11 @@ typedef struct FinetSession {
 	char buf[FINET_BUF_LEN];
 }FinetSession;
 
+typedef struct ContactInvite {
+	FinetSession *session;
+	gchar *userId;
+}ContactInvite;
+
 typedef enum {
 	eFinetCodeLogin = 0x00,
 	eFinetKeepAlive = 0x09,
