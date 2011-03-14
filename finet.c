@@ -535,6 +535,7 @@ finet_add_buddy( PurpleConnection *gc, PurpleBuddy *buddy, PurpleGroup *group )
 {
 	purple_debug_info("finet", "adding %s to %s's buddy list\n",
 		buddy->name, gc->account->username);
+	finet_send_msg( gc->proto_data, eFinetFriendshipRequest, buddy->name, "" );
 }
 
 static void
