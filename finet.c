@@ -407,6 +407,10 @@ read_cb(gpointer data, gint source, PurpleInputCondition cond)
 		dataLength = *((guint32 *)&session->buf[2]);
 		userIdLength = session->buf[6];
 		msg.code = session->buf[7];
+		// check if message fits in buffer
+		if( (dataLength*2+8+userIdLength*2) > FINET_BUF_LEN ) {
+			return;
+		}
 		if(userIdLength == 0) msg.userId = g_strdup("");
 		else {
 			len = read(session->connection, &session->buf[8], userIdLength*2);
