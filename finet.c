@@ -157,44 +157,57 @@ finet_close(PurpleConnection* gc)
 static gssize
 finet_send_msg(FinetSession* session, EFinetCodes code, const char* userId, const char* data)
 {
-	guint32 dataLength;
-	guint8  userIdLength;
 	char *buf = 0;
 	int i;
 	int offset;
 	int size;
 	gssize ret;
+	
+	glong nData;
+	glong nUserId;
 
-	dataLength = strlen(data);
-	userIdLength = strlen(userId);
+	gunichar2* data_16;
+	gunichar2* userId_16;
 
-	size = 8+2*dataLength+2*userIdLength;
+	userId_16 = g_utf8_to_utf16( userId, 255, NULL, &nUserId, NULL ); // a maximum of 255 bytes allowed for userId
+	data_16 = g_utf8_to_utf16( data, -1, NULL, &nData, NULL );
 
+	if( userId_16 == NULL || data_16 == NULL )
+	{
+		purple_debug_error( "finet", "could not convert %s %s to UTF16\n", userId, data );
+		ret = -1000;
+		goto out;
+	}
+	
+	size = 8+2*nUserId+2*nData;
 
 	buf = g_new0(char, size);
 	// @todo check for buf
 	buf[0] = FINET_CLIENT_MAGIC1;
 	buf[1] = FINET_CLIENT_MAGIC2;
-	*((guint32 *)&buf[2]) = dataLength;
-	buf[6] = userIdLength;
+	*((guint32 *)&buf[2]) = nData;
+	buf[6] = (guint8)nUserId;
 	buf[7] = code;
 
-	offset = 9;
-	for(i=0; i<(userIdLength); i++)
+	offset = 8;
+
+	for(i=0; i<(2*nUserId); i++)
 	{
-		buf[offset-1] = userId[i] ;
-		buf[offset] = 0;
-		offset +=2;
+		buf[offset] = ((char *)userId_16)[i];
+		offset++;
 	}
-	for(i=0; i<(dataLength); i++)
+	for(i=0; i<(2*nData); i++)
 	{
-		buf[offset-1] = data[i] ;
-		buf[offset] = 0;
-		offset +=2;
+		buf[offset] = ((char *)data_16)[i];
+		offset++;
 	}
 	ret = write(session->connection, buf, size);
-	purple_debug_info("finet", "sent userId: %s (%i) data: %s (%i), tot: %"G_GSSIZE_FORMAT "\n", userId, userIdLength, data, dataLength, ret);
+	purple_debug_info("finet", "sent userId: %s (%ld) data: %s (%ld), tot: %"G_GSSIZE_FORMAT "\n", userId, 2*nUserId, data, 2*nData, ret);
+
+out:
 	g_free(buf);
+	g_free(userId_16);
+	g_free(data_16);
 	return ret;
 }
 
