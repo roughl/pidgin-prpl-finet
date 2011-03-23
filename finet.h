@@ -12,7 +12,7 @@
 
 #define FINET_PORT 1080
 #define FINET_SERVER "finet.dynalias.net"
-#define FINET_BUF_LEN 255
+#define FINET_BUF_LEN 10240
 
 #define FINET_PLUGIN_VERSION "0.1"
 
