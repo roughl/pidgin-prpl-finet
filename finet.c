@@ -330,10 +330,23 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 		GtkTextBuffer* buffer = NULL;
 		GError *error = NULL;
 		buffer = gtk_text_buffer_new(NULL);
-		purple_debug_info("finet", "Received chat message from %s: %s\n", msg.userId, msg.data);
 		if( rtf_text_buffer_import_from_string( buffer, msg.data, &error ) ) {
-			gchar * data = gtk_text_buffer_get_text(buffer, NULL, NULL, FALSE);
-			serv_got_im(session->gc, msg.userId, data, PURPLE_MESSAGE_RECV, time(NULL) );
+			GtkTextIter *start = g_new(GtkTextIter, 1);
+			GtkTextIter *end = g_new(GtkTextIter, 1);
+			gtk_text_buffer_get_start_iter( buffer, start );
+			gtk_text_buffer_get_end_iter( buffer, end );
+			
+			gchar * data = gtk_text_buffer_get_text(buffer, start, end, FALSE);
+			if( data )
+			{
+				serv_got_im(session->gc, msg.userId, data, PURPLE_MESSAGE_RECV, time(NULL) );
+				g_free(data);
+			}
+			g_free(start);
+			g_free(end);
+		}
+		else {
+			purple_debug_error("finet", "Converting received data from RTF failed\n");
 		}
 		break;
 	}
@@ -574,8 +587,24 @@ finet_keepalive(PurpleConnection *gc)
 static int 
 finet_send_im( PurpleConnection* gc, const char *who, const char *message, PurpleMessageFlags flags)
 {
-	purple_debug_info("finet", "send IM {%s} to %s\n", message, who);
-	return finet_send_msg( gc->proto_data, eFinetChatMessage, who, message);
+	GtkTextBuffer* buffer;
+	gchar *rtf_text;
+	int retval = 0;
+	purple_debug_info("finet", "send IM %s to %s\n", message, who);
+	buffer = gtk_text_buffer_new(NULL);
+	gtk_text_buffer_set_text( buffer, message, -1);
+	rtf_text = rtf_text_buffer_export_to_string( buffer );
+	if( rtf_text )
+	{
+		retval = finet_send_msg( gc->proto_data, eFinetChatMessage, who, rtf_text);
+		g_free(rtf_text);
+	}
+	else
+	{
+		purple_debug_error("finet", "converting IM %s to RTF failed\n", message );
+		retval = -1000;
+	}
+	return retval;
 }
 
 static unsigned int
