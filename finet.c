@@ -376,10 +376,12 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 
 	case  eFinetSrvStartTyping: {
 		purple_debug_info("finet", "%s started typing: %s \n", msg.userId, msg.data);
+		serv_got_typing( session->gc, msg.userId, 0, PURPLE_TYPING);
 		break;
 	}
 	case  eFinetSrvStopTyping: {
 		purple_debug_info("finet", "%s stoped  typing: %s \n", msg.userId, msg.data);
+		serv_got_typing_stopped( session->gc, msg.userId);
 		break;
 	}
 
