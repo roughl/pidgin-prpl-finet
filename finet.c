@@ -396,18 +396,15 @@ read_cb(gpointer data, gint source, PurpleInputCondition cond)
 {
 	FinetSession *session = data;
 	gssize len;
-	FinetMsg msg;
-	guint32 dataLength;
-	guint8 userIdLength;
-	glong nRead;
-	glong nWrite;
+
+	if( cond != PURPLE_INPUT_READ )
+		return;
 
 	session->acct->gc->last_received = time(NULL);
-	while(1) {
-		len = read(session->connection, session->buf, 8);
+	if( session->buf == 0) {
+		len = recv(session->connection, session->header_buf, 8, MSG_PEEK);
 		// no more data available
-		if(len == -1 && errno == EAGAIN)
-		{
+		if(len == -1 && errno == EAGAIN) {
 			purple_debug_info("finet", "no more data to read\n");
 			return;
 		}
@@ -420,46 +417,81 @@ read_cb(gpointer data, gint source, PurpleInputCondition cond)
 		}
 		purple_debug_info("finet", "got pkg");
 		if(len < 8) {
-			purple_debug_error("finet", "received mal formed msg\n");
-			purple_connection_error_reason(session->gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, _("received mal formed msg"));
 			return;
 		}
-		if( session->buf[0] != FINET_SERV_MAGIC1 ||
-			session->buf[1] != FINET_SERV_MAGIC2 )
+		if( session->header_buf[0] != FINET_SERV_MAGIC1 ||
+			session->header_buf[1] != FINET_SERV_MAGIC2 )
 		{
 			purple_debug_error("finet", "wrong magic number in server pkg\n");
 			return;
 		}
-
-
-		dataLength = *((guint32 *)&session->buf[2]);
-		userIdLength = session->buf[6];
-		msg.code = session->buf[7];
-		// check if message fits in buffer
-		if( (dataLength*2+8+userIdLength*2) > FINET_BUF_LEN ) {
+		session->dataLength = *((guint32 *)&session->header_buf[2]);
+		session->userIdLength = session->header_buf[6];
+		session->msg.code = session->header_buf[7];
+		len = read(session->connection, session->header_buf, 8);
+		if( len < 8 ) {
+			purple_debug_error("finet", "received mal formed msg\n");
+			purple_connection_error_reason(session->gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, _("received mal formed msg"));
 			return;
 		}
-		if(userIdLength == 0) msg.userId = g_strdup("");
+
+		// @TODO what happens if both dataLength and userIdLength are 0?
+		session->buf = g_new0(char, session->dataLength*2 + session->userIdLength*2);
+		purple_debug_info("finet", "header complete: code: %i, dataLen: %li, useridLen: %i\n", session->msg.code, session->dataLength, session->userIdLength);
+	}
+	else {
+		glong nRead;
+		glong nWrite;
+		len = recv(session->connection, session->buf, session->userIdLength*2 + session->dataLength*2, MSG_PEEK );
+		// no more data available
+		if(len == -1 && errno == EAGAIN) {
+			purple_debug_info("finet", "no more data to read\n");
+			return;
+		}
+		if (len <= 0) {
+			purple_debug_error("finet", "connection read error, "
+				"len: %" G_GSSIZE_FORMAT "\n",
+				len );
+			purple_connection_error_reason(session->gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, _("connection read error"));
+			goto out_buf;
+		}
+		// message not yet available
+		if( len < session->userIdLength*2 + session->dataLength*2 ) {
+			purple_debug_info("finet", "message not yet available: %"G_GSSIZE_FORMAT" of %li\n", len, session->userIdLength*2 + session->dataLength*2);
+			return;
+		}
+		if(session->userIdLength == 0) {
+			session->msg.userId = g_strdup("");
+		}
 		else {
-			len = read(session->connection, &session->buf[8], userIdLength*2);
-			if(len<userIdLength*2)
-				return;
-			msg.userId = g_utf16_to_utf8((const gunichar2 *)&session->buf[8], userIdLength, &nRead, &nWrite, NULL);
+			len = read(session->connection, session->buf, session->userIdLength*2);
+			if(len<session->userIdLength*2)
+				goto out_buf;
+			session->msg.userId = g_utf16_to_utf8((const gunichar2 *)session->buf, session->userIdLength, &nRead, &nWrite, NULL);
 		}
 
-		if(dataLength == 0) msg.data = g_strdup("");
+		if(session->dataLength == 0) {
+			session->msg.data = g_strdup("");
+		}
 		else {
-			len = read(session->connection, &session->buf[8+userIdLength*2], dataLength*2);
-			if(len<dataLength*2)
+			len = read(session->connection, &session->buf[session->userIdLength*2], session->dataLength*2);
+			if(len<session->dataLength*2)
 				goto out_userId;
-			msg.data = g_utf16_to_utf8((const gunichar2 *)&session->buf[8+userIdLength*2], dataLength, &nRead, &nWrite, NULL);
+			session->msg.data = g_utf16_to_utf8((const gunichar2 *)&session->buf[session->userIdLength*2], session->dataLength, &nRead, &nWrite, NULL);
 		}
 
-		finet_handle_msg( session, msg );
+		finet_handle_msg( session, session->msg );
+
 		
-		g_free(msg.data);
-		out_userId:
-		g_free(msg.userId);
+		g_free(session->msg.data);
+		session->msg.data = 0;
+out_userId:
+		g_free(session->msg.userId);
+		session->msg.userId = 0;
+out_buf:
+		g_free(session->buf);
+		session->oldbuf = session->buf;
+		session->buf = 0;
 	}
 }
 
