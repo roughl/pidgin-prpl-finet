@@ -515,7 +515,10 @@ connect_cb(gpointer data, gint source, const char *error_message)
 		session->inpa = purple_input_add(session->connection, PURPLE_INPUT_READ, read_cb, data);
 
 		ret = finet_send_msg(session, eFinetCodeLogin, username, password);
-		purple_debug_info("finet", "Data sent\n");
+		if( ret < 0 ) {
+			purple_connection_error_reason(session->gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, _("Connection error"));
+			return;
+		}
 		purple_connection_update_progress(session->gc, _("Send login data"),
 										2,   /* which connection step this is */
 										FINET_LOGIN_STEPS);  /* total number of steps */
