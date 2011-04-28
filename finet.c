@@ -169,6 +169,10 @@ finet_send_msg(FinetSession* session, EFinetCodes code, const char* userId, cons
 	gunichar2* data_16;
 	gunichar2* userId_16;
 
+	if(session == NULL) {
+		return -1;
+	}
+
 	userId_16 = g_utf8_to_utf16( userId, 255, NULL, &nUserId, NULL ); // a maximum of 255 bytes allowed for userId
 	data_16 = g_utf8_to_utf16( data, -1, NULL, &nData, NULL );
 
