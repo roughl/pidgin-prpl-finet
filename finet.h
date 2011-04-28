@@ -10,7 +10,7 @@
 #define FINET_CLIENT_MAGIC1 0x0D
 #define FINET_CLIENT_MAGIC2 0xB0
 
-#define FINET_PORT 1080
+#define FINET_PORT 443
 #define FINET_SERVER "finet.dynalias.net"
 #define FINET_HEADER_LEN 8
 
