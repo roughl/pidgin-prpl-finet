@@ -72,7 +72,6 @@ typedef struct FinetSession {
 	guint inpa; // input handler
 	char header_buf[FINET_HEADER_LEN];
 	char *buf;
-	char *oldbuf;
 	glong dataLength;
 	guint8 userIdLength;
 	FinetMsg msg;

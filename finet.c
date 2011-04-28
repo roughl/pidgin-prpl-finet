@@ -490,7 +490,6 @@ out_userId:
 		session->msg.userId = 0;
 out_buf:
 		g_free(session->buf);
-		session->oldbuf = session->buf;
 		session->buf = 0;
 	}
 }
