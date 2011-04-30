@@ -390,6 +390,26 @@ finet_handle_msg( FinetSession* session, FinetMsg msg )
 		break;
 	}
 
+    case eFinetSrvOfflineMessage: {
+		purple_debug_info("finet", "got offline msg: %s: %s\n", msg.userId, msg.data);
+		break;
+	}
+	
+	case eFinetSrvStatusOnline: {
+		purple_prpl_got_user_status(session->acct, msg.userId, FINET_STATUS_ONLINE,
+			"message", msg.data, NULL);
+		break;
+	case eFinetSrvStatusAway:
+		purple_prpl_got_user_status(session->acct, msg.userId, FINET_STATUS_AWAY,
+			"message", msg.data, NULL);
+		break;
+	case eFinetSrvStatusBusy: 
+		purple_prpl_got_user_status(session->acct, msg.userId, FINET_STATUS_BUSY,
+			"message", msg.data, NULL);
+		break;
+	}
+
+
 	default:
 		purple_debug_info("finet","unknown: %s %s\n", msg.userId, msg.data);
 		break;
