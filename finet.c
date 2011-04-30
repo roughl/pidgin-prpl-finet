@@ -68,6 +68,7 @@
 
 #define FINET_STATUS_ONLINE   "online"
 #define FINET_STATUS_AWAY     "away"
+#define FINET_STATUS_BUSY     "busy"
 #define FINET_STATUS_OFFLINE  "offline"
 
 #define FINETPRPL_ID "prpl-finet"
@@ -568,9 +569,9 @@ finet_status_types(PurpleAccount* acct)
 	GList *types = NULL;
 	PurpleStatusType *type;
 
-	purple_debug_info("finet", "returning status types for %s: %s, %s, %s\n",
+	purple_debug_info("finet", "returning status types for %s: %s, %s, %s, %s\n",
 					acct->username,
-					FINET_STATUS_ONLINE, FINET_STATUS_AWAY, FINET_STATUS_OFFLINE);
+					FINET_STATUS_ONLINE, FINET_STATUS_AWAY, FINET_STATUS_BUSY, FINET_STATUS_OFFLINE);
 
 	type = purple_status_type_new_with_attrs(PURPLE_STATUS_AVAILABLE,
 	  FINET_STATUS_ONLINE, NULL, TRUE, TRUE, FALSE,
@@ -580,6 +581,12 @@ finet_status_types(PurpleAccount* acct)
 
 	type = purple_status_type_new_with_attrs(PURPLE_STATUS_AWAY,
 	  FINET_STATUS_AWAY, NULL, TRUE, TRUE, FALSE,
+	  "message", _("Message"), purple_value_new(PURPLE_TYPE_STRING),
+	  NULL);
+	types = g_list_prepend(types, type);
+	
+	type = purple_status_type_new_with_attrs(PURPLE_STATUS_UNAVAILABLE,
+	  FINET_STATUS_BUSY, NULL, TRUE, TRUE, FALSE,
 	  "message", _("Message"), purple_value_new(PURPLE_TYPE_STRING),
 	  NULL);
 	types = g_list_prepend(types, type);
