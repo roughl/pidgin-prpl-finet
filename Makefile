@@ -10,6 +10,7 @@ FINET_SOURCES = \
 all:	finet.so
 
 install:	finet.so
+	mkdir -p ~/.purple/plugins
 	cp finet.so ~/.purple/plugins/
 
 clean:
