@@ -626,8 +626,7 @@ finet_status_types(PurpleAccount* acct)
 static const char*
 finet_list_icon(PurpleAccount *account, PurpleBuddy *buddy)
 {
-	purple_debug_info("finet", "finet_list_icon()\n");
-	return "finet";
+	return NULL;
 }
 
 static void
