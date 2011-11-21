@@ -699,20 +699,19 @@ static void
 finet_set_status( PurpleAccount* acct, PurpleStatus* status )
 {
 	const char* state;
-	//const char* message;
+	const char* message;
 
 	state = purple_status_get_id(status);
-	//message = purple_status_get_attr_string(status, "message");
-	//purple_debug_info("finet", "set status to %s: %s\n", state, message);
-	purple_debug_info("finet", "set status to %s\n", state );
+	message = purple_status_get_attr_string(status, "message");
+	purple_debug_info("finet", "set status to %s: %s\n", state, message);
 	if( strcmp(state, FINET_STATUS_ONLINE) == 0 ) {
-		finet_send_msg(acct->gc->proto_data, eFinetStatusOnline, "", "");
+		finet_send_msg(acct->gc->proto_data, eFinetStatusOnline, "", message);
 	}
 	else if( strcmp(state, FINET_STATUS_BUSY) == 0 ) {
-		finet_send_msg(acct->gc->proto_data, eFinetStatusBusy, "", "");
+		finet_send_msg(acct->gc->proto_data, eFinetStatusBusy, "", message);
 	}
 	else if( strcmp(state, FINET_STATUS_AWAY) == 0 ) {
-		finet_send_msg(acct->gc->proto_data, eFinetStatusAway, "", "");
+		finet_send_msg(acct->gc->proto_data, eFinetStatusAway, "", message);
 	}
 	else {
 		purple_debug_error("finet", "status unknown!\n");
