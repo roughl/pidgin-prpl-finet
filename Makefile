@@ -3,19 +3,21 @@ LIBPURPLE_CFLAGS = `pkg-config --libs --cflags osxcart` `pkg-config --cflags pur
 
 CFLAGS = ${LIBPURPLE_CFLAGS} -Wall -I. -g -O2 -pipe
 
+BIN=libfinet.so
+
 FINET_SOURCES = \
 	finet.c \
 	finet.h
 
-all:	finet.so
+all:	${BIN}
 
 install:	finet.so
 	mkdir -p ~/.purple/plugins
-	cp finet.so ~/.purple/plugins/
+	cp ${BIN} ~/.purple/plugins/
 
 clean:
-	rm finet.so
+	rm ${BIN}
 
 
-finet.so: ${FINET_SOURCES}
-	${GCC} ${CFLAGS} ${FINET_SOURCES} -o finet.so -shared -fPIC -DPIC
+${BIN}: ${FINET_SOURCES}
+	${GCC} ${CFLAGS} ${FINET_SOURCES} -o ${BIN} -shared -fPIC -DPIC
