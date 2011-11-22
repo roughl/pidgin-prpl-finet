@@ -5,20 +5,26 @@ Requirements
 
 Building
 ========
-``make``
+::
+
+	make
 
 Installation
 ============
-``make install``
+::
+
+	make install
 
 Which copies the plugin to ~/.purple/plugins/
 
 Ubuntu Example
 ==============
-``sudo apt-get install pidgin-dev libpth-dev``
+::
+
+	sudo apt-get install pidgin-dev libpth-dev
 
 and then install the osxcart from http://sourceforge.net/projects/osxcart/
+::
 
-``make``
-``make install``
-
+	make
+	make install
