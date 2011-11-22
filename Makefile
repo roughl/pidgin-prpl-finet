@@ -3,7 +3,7 @@ TARGET=libfinet.so
 
 LIBPURPLE_CFLAGS = `pkg-config --cflags purple` -DPURPLE_PLUGINS -DENABLE_NLS -DHAVE_ZLIB
 CFLAGS += `pkg-config --cflags osxcart` $(LIBPURPLE_CFLAGS) -Wall -I. -g -O2 -pipe
-LDFLAGS += `pkg-config --libs osxcart`
+LDFLAGS = `pkg-config --libs osxcart`
 
 # default is installation in home without pixmaps
 PREFIX ?= ~
