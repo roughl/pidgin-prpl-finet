@@ -1,11 +1,24 @@
+Requirements
+============
+1. development package of pidgin and libpurple
+#. osxcart (http://sourceforge.net/projects/osxcart/)
+
 Building
 ========
-
-To build the finet protocol plugin for pidgin, you will need the development package of pidgin and the osxcart (http://sourceforge.net/projects/osxcart/) library.
-
-If you have installed the necessary packages just type make.
+``make``
 
 Installation
 ============
-cp finet.so  ~/.purple/plugins/
+``make install``
+
+Which copies the plugin to ~/.purple/plugins/
+
+Ubuntu Example
+==============
+``sudo apt-get install pidgin-dev libpth-dev``
+
+and then install the osxcart from http://sourceforge.net/projects/osxcart/
+
+``make``
+``make install``
 
