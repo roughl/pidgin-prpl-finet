@@ -626,6 +626,10 @@ finet_status_types(PurpleAccount* acct)
 static const char*
 finet_list_icon(PurpleAccount *account, PurpleBuddy *buddy)
 {
+	// return protocol icon
+	if( account==NULL && buddy==NULL ) {
+		return "finet";
+	}
 	return NULL;
 }
 
