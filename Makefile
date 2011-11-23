@@ -44,3 +44,6 @@ $(PIXMAPDIR)/%: ./%
 ${TARGET}: ${FINET_SOURCES}
 	${CC} ${CFLAGS} ${LDFLAGS} ${FINET_SOURCES} -o ${TARGET} -shared -fPIC -DPIC
 
+tags: ${FINET_SOURCES}
+	ctags --sort=yes ${FINET_SOURCES}
+
