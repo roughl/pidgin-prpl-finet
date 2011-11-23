@@ -558,31 +558,43 @@ connect_cb(gpointer data, gint source, const char *error_message)
 }
 
 static void
-finet_login(PurpleAccount* acct)
+finet_create_session(PurpleAccount* acct, PurpleProxyConnectFunction callback)
 {
 	FinetSession* session; 
 	int port;
 	const char *host;
 	PurpleConnection *gc;
 
+	gc = purple_account_get_connection(acct);
+	if(gc->proto_data) {
+		purple_debug_error("finet", "session does already exist\n");
+		return;
+	}
 	session = g_new0(FinetSession, 1);
 	session->inpa = 0;
 	session->acct = acct;
-	gc = purple_account_get_connection(acct);
 	session->gc = gc;
 	gc->proto_data = session;
+	host = purple_account_get_string(acct, "host", FINET_SERVER);
+	port = purple_account_get_int(acct, "port", FINET_PORT);
+	purple_debug_info("finet", "connect(%s, %i)\n", host, port);
+	session->connect_data = purple_proxy_connect(NULL, acct, host, port, callback, session);
+}
+
+static void
+finet_login(PurpleAccount* acct)
+{
+	PurpleConnection *gc;
+
+	gc = purple_account_get_connection(acct);
 	purple_debug_info("finet", "logging in %s\n", acct->username);
 	purple_connection_update_progress(gc, _("Connecting"),
 									0,   /* which connection step this is */
 									FINET_LOGIN_STEPS);  /* total number of steps */
 
 
-	host = purple_account_get_string(acct, "host", FINET_SERVER);
-	port = purple_account_get_int(acct, "port", FINET_PORT);
 
-	purple_debug_info("finet", "connect(%s, %i)\n", host, port);
-	session->connect_data = purple_proxy_connect(NULL, acct, host, port, connect_cb, session);
-	
+	finet_create_session( acct, connect_cb);
 	return;
 }
 
