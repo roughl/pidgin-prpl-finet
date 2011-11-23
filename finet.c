@@ -669,6 +669,71 @@ finet_keepalive(PurpleConnection *gc)
 	return;
 }
 
+static void
+connect_cb_register_user(gpointer data, gint source, const char *error_message)
+{
+	const gchar* username;
+	const gchar* password;
+	FinetSession* session = data;
+	session->connection = source;
+	username = purple_account_get_username(session->acct);
+	password = purple_connection_get_password(session->gc);
+	if( finet_send_msg( session, eFinetNewAccount, username, password ) < 0) {
+		purple_debug_error("finet", "connect_cb_register_user() failed\n");
+		return;
+	}
+	purple_debug_info("finet", "Created new account\n");
+	return;
+}
+
+static void
+finet_register_user(PurpleAccount* acct)
+{
+	static const char forbidden[] = { '\\','/','<','>','"','?','|',':','*', '.' };
+	int i,j;
+	PurpleConnection *gc;
+	const char *username;
+	const char *password;
+	gc = purple_account_get_connection(acct);
+	username = purple_account_get_username(acct);
+	password = purple_connection_get_password(gc);
+	// check for length
+	if( strlen(username) < 4 ) {
+		purple_debug_error("finet", "username to short\n");
+		goto fail;
+	}
+	if( strlen(username) > 20 ) {
+		purple_debug_error("finet", "username to long\n");
+		goto fail;
+	}
+	if( password == NULL ) {
+		purple_debug_error("finet", "no password\n");
+		goto fail;
+	}
+	if( strlen(password) < 6) {
+		purple_debug_error("finet", "password to short\n");
+		goto fail;
+	}
+	if( strlen(password) > 30) {
+		purple_debug_error("finet", "password to long\n");
+		goto fail;
+	}
+	
+	// check for forbidden characters
+	for(i=0; i<sizeof(forbidden)/sizeof(forbidden[0]); i++) {
+		for(j=0; j<strlen(username); j++) {
+			if(username[j] == forbidden[i]) {
+				purple_debug_error("finet", "username contains forbidden characters\n");
+				goto fail;
+			}
+		}
+	}
+	finet_create_session(acct, connect_cb_register_user );
+	return;
+fail:
+	purple_debug_error("finet", "Creating new account failed\n");
+}
+
 static int 
 finet_send_im( PurpleConnection* gc, const char *who, const char *message, PurpleMessageFlags flags)
 {
@@ -773,7 +838,7 @@ PurplePluginProtocolInfo prpl_info = {
 	NULL,                /* chat_whisper */
 	NULL,//finet_chat_send,     /* chat_send */
 	finet_keepalive,     /* keepalive */
-	NULL,                /* register_user */
+	finet_register_user, /* register_user */
 	NULL,                /* get_cb_info */
 	NULL,                /* get_cb_away */
 	NULL,//finet_alias_buddy,   /* alias_buddy */
