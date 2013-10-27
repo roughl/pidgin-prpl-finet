@@ -11,7 +11,7 @@
 #define FINET_CLIENT_MAGIC2 0xB0
 
 #define FINET_PORT 443
-#define FINET_SERVER "finet.dynalias.net"
+#define FINET_SERVER "finet.dyndns-server.com"
 #define FINET_HEADER_LEN 8
 
 #define FINET_ALIAS_MAXLEN 100
