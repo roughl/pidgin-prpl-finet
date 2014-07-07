@@ -28,3 +28,4 @@ and then install the osxcart from http://sourceforge.net/projects/osxcart/
 
 	make
 	make install
+  sudo ln -s /usr/local/lib/libosxcart.so.0 /usr/lib/libosxcart.so.0
